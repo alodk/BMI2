@@ -1,0 +1,913 @@
+import java.applet.Applet;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+// import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.TitledBorder;
+import com.swtdesigner.FocusTraversalOnArray;
+
+public class Bmi extends Applet
+{
+   int voksenIndex = 2; /* kvinde*/
+   int maxAlder = 100;
+   int voksenAlderIndex =20;
+   boolean nulstil_statur =false;
+   boolean nulstil_sex=false;
+   double staturPower[]={2.0, 1.8 , 2.0 , 2.2};
+   double staturFaktor[]={1.0, 0.895, 1.0, 1.114};
+   final String staturtxt[] = {"", " smal ", " almindelig bygget "," bred "};
+
+   private ButtonGroup buttonGroup = new ButtonGroup();
+
+   private static final long serialVersionUID = 1L;
+   boolean isStandalone = false;
+   BorderLayout borderLayout1 = new BorderLayout();
+   int antalBMIgrupper = 6;
+   String[]bmiGruppetxt= new String[7];
+   float[][] bmigrænse= new float[2][antalBMIgrupper];
+
+   String TxtSex;
+   String TxtStatur;
+   String TxtvarIntro;
+   String TxtBarnBmi;
+   String PanelRGB;
+   String OverskriftForRGB;
+   String OverskriftBagRGB;
+   
+   JTextField jTextField1 = new JTextField();
+   JLabel jLabel2 = new JLabel();
+   JLabel jLabel3 = new JLabel();
+   JLabel jLabel4 = new JLabel();
+   JTextField jTextField2 = new JTextField();
+   JButton jButton1 = new JButton();
+   JTextField jTextField3 = new JTextField();
+   JLabel jLabel5 = new JLabel();
+   JTextArea jTextArea1 = new JTextArea();
+   TitledBorder titledBorder1 = new TitledBorder("");
+   JPanel jPanel1 = new JPanel();
+   JPanel jPanel2 = new JPanel();
+   JPanel jPanel3 = new JPanel();
+   JPanel jPanel4 = new JPanel();
+
+   FlowLayout flowLayout1 = new FlowLayout();
+   FlowLayout flowLayout2 = new FlowLayout();
+
+   private final JPanel panelRamme = new JPanel();
+   private final JRadioButton smalRadioButton = new JRadioButton();
+   private final JRadioButton almindeligRadioButton = new JRadioButton();
+   private final JRadioButton bredRadioButton = new JRadioButton();
+   private final JPanel panelRadioRamme = new JPanel();
+   private final JLabel staturLabel = new JLabel();
+   private final JPanel panelAlderSexLabels = new JPanel();
+   private final JLabel labelAlder = new JLabel();
+   private final JLabel labelSex = new JLabel();
+   private final JPanel panelAlderSexInput = new JPanel();
+   private final JComboBox comboBoxAlder = new JComboBox();
+   private final JComboBox comboBoxSex = new JComboBox();
+   private final JScrollPane scrollPane = new JScrollPane();
+   public String getParameter(String key, String def)
+   {
+      return ((getParameter(key) != null) ? getParameter(key) : (this.isStandalone) ? System.getProperty(key, def) : def);
+   }
+
+   public void init()
+   {
+      try
+      {
+         this.bmiGruppetxt[0] = getParameter("TextUnder", "underernæret");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmiGruppetxt[1] = getParameter("TextNorm", "normal");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmiGruppetxt[2] = getParameter("TextMaginFed", "marginal overvægtig");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmiGruppetxt[3] = getParameter("TextOvervægt", "overvægtig");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmiGruppetxt[4] = getParameter("TextFed", "fed");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmiGruppetxt[5] = getParameter("TextExtremtFed", "ekstremt fed");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+
+      try {
+         this.bmigrænse[0][0] =  Float.parseFloat(getParameter("LimKUnder", "19.1"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[1][0] = Float.parseFloat(getParameter("LimMUnder", "20.7"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[0][1] = Float.parseFloat(getParameter("LimKNorm", "25.8"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[1][1] = Float.parseFloat(getParameter("LimMNorm", "26.4"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[0][2] = Float.parseFloat(getParameter("LimKMargOver", "27.3"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[1][2] = Float.parseFloat(getParameter("LimMMargOver", "27.8"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[0][3] = Float.parseFloat(getParameter("LimKOver", "32.2"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[1][3] = Float.parseFloat(getParameter("LimKOver", "31.1"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[0][4] = Float.parseFloat(getParameter("LimKFed", "44.8"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.bmigrænse[1][4] = Float.parseFloat(getParameter("LimMFed", "45.4"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+
+      try {
+         this.bmigrænse[0][5] = Float.parseFloat(getParameter("LimKXtremFed", "44.8"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }try {
+         this.bmigrænse[1][5] = Float.parseFloat(getParameter("LimMXtremFed", "45.4"));
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.TxtSex = getParameter("TextSex", "Kvinde");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.TxtStatur = getParameter("TextStatur", "norm");
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.TxtBarnBmi = getParameter("TextBarnBmi", "Off"); /* On/Off */
+      } catch (Exception e) {
+         e.printStackTrace();
+      }   
+      try {
+         this.PanelRGB = getParameter("PanelRGB", "#f0f0ff"); /* #ffffff */
+      } catch (Exception e) {
+         e.printStackTrace();
+      }      
+      try {
+         this.OverskriftForRGB = getParameter("OverskriftForRGB", "#2020ff"); /* #ffffff */
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.OverskriftBagRGB = getParameter("OverskriftBagRGB", "#e0e0e0"); /* #ffffff */
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         this.TxtvarIntro = getParameter("ParamIntroTxt", "BMI siger noget om din vægt i forhold til din højde. \n\n" +
+               "Følgende værdier er for kvinder af normal statur. \n\n" +
+               "Hvis man vejer under " + this.bmigrænse[0][0] + " er man for tynd og hvis man ligger langt under kan det være usundt.\n" +
+               "Er tallet imellem " + this.bmigrænse[0][0] + " og " + this.bmigrænse[0][1] + ", er man i normalområdet.\n" +
+               "Er tallet imellem " + this.bmigrænse[0][1] + " og " + this.bmigrænse[0][2] + ", er man marginalt overvægtigt og skal være opmærksom på at vægten hellere skal ned end op.\n" +
+               "Er tallet imellem " + this.bmigrænse[0][2] + " og " + this.bmigrænse[0][3] + ", er man overvægtig og skal overveje god, sund kost og mere motion.\n" +
+               "Er tallet over " + this.bmigrænse[0][3] + ", er man fed og det kan anbefales at få hjælp til at komme ned på en sundere vægt, inden det går varigt ud over helbredet.\n"
+         );
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+      try {
+         jbInit();
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      this.jTextArea1.setText(this.TxtvarIntro);
+      staturInit();
+      alderInit();
+      sexInit();
+      setPanelFarve();
+      setOverskriftForFarve();
+      setOverskriftBagFarve();
+   }
+
+   private void jbInit() throws Exception
+   {
+      setLayout(this.flowLayout1);
+      jLabel2.setForeground(Color.BLUE);
+      jLabel2.setOpaque(true);
+      this.jLabel2.setFont(new Font("Arial Black", 0, 25));
+      this.jLabel2.setToolTipText("");
+      this.jLabel2.setDisplayedMnemonic('0');
+      this.jLabel2.setText("Beregn dit BMI index");
+      add(this.jLabel2, null);
+      setBackground(Color.WHITE);
+      this.jLabel3.setBackground(Color.lightGray);
+      jLabel3.setIconTextGap(2);
+      jLabel3.setPreferredSize(new Dimension(40, 18));
+      this.jLabel3.setToolTipText("Indtast din højde her");
+      this.jLabel3.setText("Højde");
+      this.jLabel4.setBackground(Color.lightGray);
+      jLabel4.setIconTextGap(2);
+      jLabel4.setPreferredSize(new Dimension(40, 18));
+      jLabel4.setMinimumSize(new Dimension(0, 0));
+      this.jLabel4.setText("Vægt");
+
+      jPanel4.add(panelAlderSexLabels);
+      jPanel4.setFocusCycleRoot(true);
+      jPanel4.setFocusTraversalPolicyProvider(true);
+      jPanel4.setBorder(new BevelBorder(BevelBorder.RAISED));
+      panelAlderSexLabels.setOpaque(false);
+      panelAlderSexLabels.setBackground(Color.LIGHT_GRAY);
+      final FlowLayout flowLayout_1 = new FlowLayout();
+      flowLayout_1.setVgap(8);
+      flowLayout_1.setAlignment(FlowLayout.LEFT);
+      panelAlderSexLabels.setLayout(flowLayout_1);
+      panelAlderSexLabels.setPreferredSize(new Dimension(42, 60));
+
+      panelAlderSexLabels.add(labelSex);
+      labelSex.setPreferredSize(new Dimension(35, 20));
+      labelSex.setText("Køn");
+
+      panelAlderSexLabels.add(labelAlder);
+      labelAlder.setPreferredSize(new Dimension(40, 20));
+      labelAlder.setText("Alder");
+
+      jPanel4.add(panelAlderSexInput);
+      panelAlderSexInput.setOpaque(false);
+      panelAlderSexInput.setBackground(Color.LIGHT_GRAY);
+      panelAlderSexInput.setPreferredSize(new Dimension(115, 60));
+
+      panelAlderSexInput.add(comboBoxSex);
+      comboBoxSex.setFocusCycleRoot(true);
+      comboBoxSex.setFocusTraversalPolicyProvider(true);
+//      comboBoxSex.addActionListener(new ComboBoxSexActionListener());
+      comboBoxSex.addItemListener(new ComboBoxSexItemListener());
+      comboBoxSex.setPreferredSize(new Dimension(112, 24));
+      comboBoxSex.setModel(new DefaultComboBoxModel(new String[] {"Pige", "Dreng", "Kvinde", "Mand"}));
+
+      panelAlderSexInput.add(comboBoxAlder);
+      comboBoxAlder.setFocusTraversalPolicyProvider(true);
+      comboBoxAlder.setMaximumRowCount(4);
+      comboBoxAlder.setAutoscrolls(true);
+      comboBoxAlder.addItemListener(new ComboBoxAlderItemListener());
+      comboBoxAlder.setPreferredSize(new Dimension(112, 24));
+      comboBoxAlder.setModel(new DefaultComboBoxModel(new String[] {"0-3", "4-10", "11-15", "16-20", "21-30", "31-40", "41-50", "51-60", "60+"}));
+      this.jPanel1.setBackground(Color.lightGray);
+      jPanel1.setOpaque(false);
+      final FlowLayout flowLayout_2 = new FlowLayout();
+      flowLayout_2.setVgap(8);
+      flowLayout_2.setAlignment(FlowLayout.LEFT);
+      jPanel1.setLayout(flowLayout_2);
+      jPanel4.add(jPanel1);
+      jPanel4.setPreferredSize(new Dimension(288, 180));
+      jPanel4.setMaximumSize(new Dimension(288, 150));
+      jPanel1.setMinimumSize(new Dimension(48, 54));
+      jPanel1.setPreferredSize(new Dimension(42, 60));
+      this.jPanel1.add(this.jLabel3);
+      this.jPanel1.add(this.jLabel4);
+      this.jTextField1.setBackground(new Color(230, 241, 255));
+      jTextField1.setFocusTraversalPolicyProvider(true);
+      this.jTextField1.setBorder(BorderFactory.createLoweredBevelBorder());
+      this.jTextField1.setText("");
+      this.jTextField1.setColumns(5);
+      this.jTextField1.setToolTipText("Indtast et helt tal mindre end 250");
+      this.jTextField2.setBackground(new Color(232, 243, 255));
+      jTextField2.setFocusTraversalPolicyProvider(true);
+      this.jTextField2.setBorder(BorderFactory.createLoweredBevelBorder());
+      this.jTextField2.setText("");
+      this.jTextField2.setColumns(5);
+      this.jTextField2.setToolTipText("Indtast et helt tal mindre end 210");
+      this.jPanel2.setBackground(Color.lightGray);
+      jPanel2.setOpaque(false);
+      jPanel2.setMaximumSize(new Dimension(50, 60));
+      jPanel2.setPreferredSize(new Dimension(60, 50));
+      this.jPanel4.add(this.jPanel2);
+      this.jPanel2.add(this.jTextField2);
+      this.jPanel2.add(this.jTextField1);
+
+      this.jPanel4.setLayout(this.flowLayout2);
+      this.jPanel4.setBackground(new Color(240, 248, 255));
+      this.jPanel4.setRequestFocusEnabled(false);
+      this.jPanel4.setVerifyInputWhenFocusTarget(false);
+      add(this.jPanel4, null);
+
+      jPanel4.add(panelRadioRamme);
+      panelRadioRamme.setOpaque(false);
+      panelRadioRamme.setBorder(new BevelBorder(BevelBorder.RAISED));
+      final FlowLayout flowLayout = new FlowLayout();
+      flowLayout.setVgap(1);
+      flowLayout.setHgap(0);
+      panelRadioRamme.setLayout(flowLayout);
+      panelRadioRamme.setPreferredSize(new Dimension(284, 30));
+
+      panelRadioRamme.add(staturLabel);
+      staturLabel.setText("Statur:   ");
+      smalRadioButton.setName("smalRadioButton");
+      smalRadioButton.setOpaque(false);
+      smalRadioButton.addActionListener(new SmalRadioButtonActionListener());
+      smalRadioButton.setBackground(Color.LIGHT_GRAY);
+
+      panelRadioRamme.add(smalRadioButton);
+      buttonGroup.add(smalRadioButton);
+      smalRadioButton.setText("Smal");
+      almindeligRadioButton.setName("almindeligRadioButton");
+      almindeligRadioButton.setOpaque(false);
+      almindeligRadioButton.addActionListener(new AlmindeligRadioButtonActionListener());
+      almindeligRadioButton.setSelected(true);
+      almindeligRadioButton.setBackground(Color.LIGHT_GRAY);
+
+      panelRadioRamme.add(almindeligRadioButton);
+      buttonGroup.add(almindeligRadioButton);
+      almindeligRadioButton.setText("Almindelig");
+      bredRadioButton.setName("bredRadioButton");
+      bredRadioButton.setOpaque(false);
+      bredRadioButton.addActionListener(new BredRadioButtonActionListener());
+      bredRadioButton.setBackground(Color.LIGHT_GRAY);
+
+      panelRadioRamme.add(bredRadioButton);
+      buttonGroup.add(bredRadioButton);
+      bredRadioButton.setText("Bred");
+
+      jPanel4.add(panelRamme);
+      panelRamme.setOpaque(false);
+      panelRamme.setPreferredSize(new Dimension(160, 70));
+      panelRamme.setMaximumSize(new Dimension(100, 120));
+      panelRamme.setBackground(Color.LIGHT_GRAY);
+      this.jButton1.setToolTipText("Copyright ALO");
+      panelRamme.add(jButton1);
+      this.jButton1.setActionCommand("Beregn");
+      this.jButton1.setText("Beregn BMI");
+      this.jButton1.addMouseListener(new Bmi_jButton1_mouseAdapter(this));
+      this.jLabel5.setToolTipText("");
+      jPanel3.add(jLabel5);
+      jPanel3.setOpaque(false);
+      panelRamme.add(jPanel3);
+      this.jLabel5.setText("Dit BMI index er:");
+      this.jTextField3.setBackground(new Color(255, 255, 201));
+      this.jTextField3.setBorder(BorderFactory.createLoweredBevelBorder());
+      this.jTextField3.setMinimumSize(new Dimension(44, 19));
+      this.jTextField3.setToolTipText("Her står dit bodymass index");
+      this.jTextField3.setText("");
+      this.jTextField3.setColumns(5);
+      this.jPanel3.setBackground(Color.lightGray);
+      this.jPanel3.add(this.jTextField3);
+      jPanel4.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[] {panelAlderSexLabels, comboBoxSex, comboBoxAlder, jTextField2, jTextField1, smalRadioButton, almindeligRadioButton, bredRadioButton, jButton1}));
+
+      add(scrollPane);
+      scrollPane.setPreferredSize(new Dimension(288, 200));
+      this.jTextArea1.setBackground(new Color(245, 245, 245));
+      jTextArea1.setMaximumSize(new Dimension(288, 1024));
+      scrollPane.setViewportView(jTextArea1);
+      this.jTextArea1.setEditable(true);
+      this.jTextArea1.setBorder(BorderFactory.createLoweredBevelBorder());
+      this.jTextArea1.setMinimumSize(new Dimension(288, 200));
+      this.jTextArea1.setPreferredSize(new Dimension(288, 400));
+      this.jTextArea1.setInputVerifier(null);
+      this.jTextArea1.setText("");
+      this.jTextArea1.setLineWrap(true);
+      this.jTextArea1.setWrapStyleWord(true);
+   }
+
+   public String getAppletInfo()
+   {
+      return "Applet Information";
+   }
+
+   public String[][] getParameterInfo()
+   {
+      String[][] pinfo = {
+            { "TextUnder", "String", "Txt=underernæret" },
+            { "TextNorm", "String", "Txt=normal" },
+            { "TextMaginFed", "String", "Txt=marginal overvægtig" },
+            { "TextFed", "String", "Txt=fed" },
+            { "TextMegetFed", "String", "Txt=meget fed" },
+            { "TextExtremtFed", "String", "Txt=ekstremt fed" },
+            { "LimKUnder", "float", "Kommatal: Så er man en udsultet kvinde" },
+            { "LimMUnder", "float", "Kommatal: Så er man en udsultet mand" },
+            { "LimKNorm",  "float", "Kommatal: Så er man en normal kvinde" },
+            { "LimMNorm",  "float", "Kommatal: Så er man en normal mand" },
+            { "LimKMargOver", "float", "Kommatal: Så er man en marginalt overvægtig kvinde" },
+            { "LimMMargOver", "float", "Kommatal: Så er man en marginalt overvægtig mand" },
+            { "LimKOver", "float", "Kommatal: Så er man en overvægtig kvinde" },
+            { "LimMOver", "float", "Kommatal: Så er man en overvægtig mand" },
+            { "LimKFed", "float", "Kommatal: Så er man en fed kvinde" },
+            { "LimMFed", "float", "Kommatal: Så er man en fed mand" },
+            { "LimKXtremFed", "float", "Kommatal: Så er man en ekstremt fed kvinde" },
+            { "LimMXtremFed", "float", "Kommatal: Så er man en ekstremt fed mand" },
+            { "TextSex", "String", "Køn, En af: Pige, Dreng, Kvinde, Mand" }, /* Default:"Kvinde" */
+            { "TextStatur", "String", "Statur,En af: smal, norm, bred" }, /* Default: "norm" */
+            { "TextBarnBmi", "String", "Tænd/sluk for BMI for børn: On, Off" }, /* Default: "Off" */
+            { "ParamIntroTxt", "String", "Beskriv BMI. Starttekst i det store tekstfelt" },
+            { "PanelRGB", "String", "Hextal for RGB-farve fx. #f0f0f0" },
+            { "OverskriftForRGB", "String", "Hextal for RGB-farve fx. #1010ff" },
+            { "OverskriftBagRGB", "String", "Hextal for RGB-farve fx. #f0f0f0" }};
+
+      return pinfo;
+   }
+
+   public void setPanelFarve(){
+      if(PanelRGB !="")
+      {
+         if(PanelRGB.length()==7){
+            if(PanelRGB.startsWith("#")){
+               jPanel2.setBackground(Color.decode(PanelRGB));
+            }
+         }
+      }
+
+   }
+   public void setOverskriftForFarve(){
+      if(OverskriftForRGB !="")
+      {
+         if(OverskriftForRGB.length()==7){
+            if(OverskriftForRGB.startsWith("#")){
+               jLabel2.setForeground(Color.decode(OverskriftForRGB));
+            }
+         }
+      }
+
+   }
+   public void setOverskriftBagFarve(){
+      if(OverskriftBagRGB !="")
+      {
+         if(OverskriftBagRGB.length()==7){
+            if(OverskriftBagRGB.startsWith("#")){
+               jLabel2.setBackground(Color.decode(OverskriftBagRGB));
+            }
+         }
+      }
+
+   }
+   
+   
+   public void staturInit(){
+      if (!nulstil_statur){
+         if ( TxtStatur.compareTo("smal") == 0){
+            smalRadioButton.doClick();
+            smalRadioButton.setSelected(true);
+            }       
+         if ( TxtStatur.compareTo("norm") == 0){
+            almindeligRadioButton.doClick();
+            almindeligRadioButton.setSelected(true);
+            }       
+         if ( TxtStatur.compareTo("bred") == 0){
+            bredRadioButton.doClick();
+            bredRadioButton.setSelected(true);
+            }
+         nulstil_statur = true;          /* Det skal kun gøres en gang. */
+      }
+   }
+   
+   public void sexInit(){
+      /* (v.compareTo("bmi")==0) */
+      if(!nulstil_sex){
+         if ( TxtSex.compareTo("Pige") == 0){
+            comboBoxSex.setSelectedIndex(0);
+         }
+         if ( TxtSex.compareTo("Dreng") == 0){
+            comboBoxSex.setSelectedIndex(1);
+         }        
+         if ( TxtSex.compareTo("Kvinde") == 0){
+            comboBoxSex.setSelectedIndex(2);
+         } 
+         if ( TxtSex.compareTo("Mand") == 0){
+            comboBoxSex.setSelectedIndex(3);
+         }
+      }
+   }   
+   public void alderInit(){
+
+      if(!nulstil_sex){
+         
+         String aldreIListe[]= new String[maxAlder];
+         for(int i =0; i <maxAlder;i++){
+            aldreIListe[i] = Integer.toString(i);
+         }
+            
+               
+         comboBoxAlder.setModel(new DefaultComboBoxModel( (Object[]) aldreIListe));
+                     
+      }
+   }
+   public float beregnBmi( int vægt, int højde){
+      float bmital;
+      double bmi_1 = staturFaktor[0] *(double)vægt / Math.pow((double)højde/100 , staturPower[0]);
+      bmi_1 *= 10.0F;
+      bmital = (int)bmi_1;
+      bmital /= 10.0F;
+
+      return(bmital);
+   }
+
+   public int findVoksenBmigruppe(float bmi, int sex){
+      int index=0;
+      String tegn;
+      double alderBMI;
+      double gruppeprocent[]= new double[2];
+      double grænseflyt[] = new double[2];
+      
+      double aldersfaktor=7.1;
+      double aldersprocent = 0.0;
+      int alder = this.comboBoxAlder.getSelectedIndex();
+      
+      grænseflyt[0] =0.484375; // Kvinder
+      gruppeprocent[0]= 25.6;
+
+      grænseflyt[1] =0.619496; // Kvinder
+      gruppeprocent[1]= 15.9;
+      
+      aldersfaktor = (( voksenAlderIndex - (double)alder)/((double)80 - voksenAlderIndex ));
+
+      alderBMI = bmi * ((100 + gruppeprocent[sex] * aldersfaktor)/100);
+   
+      while ( index < antalBMIgrupper -1 & alderBMI + 0.1 >  this.bmigrænse[sex][index]){
+
+         alderBMI =bmi * ((100 + gruppeprocent[sex] * aldersfaktor)/100);
+
+         gruppeprocent[sex] *= grænseflyt[sex];// halveres ca, mellem hver grænse over første.
+
+         index++;
+         
+      }
+      aldersprocent = (((double)bmi - alderBMI)/(double)bmi) * 100.0d;
+      
+      float tmp= (float)((int)(aldersprocent*10)) /10f;
+      
+      if (tmp>=0){
+         tegn="+";}
+      else{
+         tegn="";
+      }
+
+      this.jTextArea1.setText("Statur, alder og køn gør at BMI må være " + tegn + tmp + "%.\n" );
+      return(index);
+
+   }
+   public int findBørneBmigruppe(float bmi, int sex){/*  skal senere finde børnebmigruppe i tabel*/
+      
+
+      return(findVoksenBmigruppe(bmi, sex)); /*Dummy så programmet virker*/
+   }
+
+   public void setServicemode(){
+      /* viser parametre i bmivindue */
+      /* Indtast i bmi textfeltet og få svar i tekstarea */
+      {
+         jLabel2.setText("BMI servicemode");
+         jLabel3.setText("Mode");
+         labelAlder.setText("Param");
+         jLabel4.setText("Værdi");
+         comboBoxSex.setModel(new DefaultComboBoxModel(new String[] {"Vis", "Set"}));
+         labelSex.setText("Vælg");
+         jLabel5.setText("Indtast værdi");
+         jButton1.setText("Vis data");
+         
+         String Parameter[][]=getParameterInfo();
+         int antal=Parameter.length;
+         
+         String[] Pnavn=new String[antal];
+         
+         for(int i=0 ; i<antal ;i++){
+            Pnavn[i]=Parameter[i][0];
+         }
+         comboBoxAlder.setModel(new DefaultComboBoxModel(Pnavn));
+         
+         jTextArea1.setText("Velkommen til servicemode.\n\n" +
+               "Her kan du se information om de parametre du skal bruge til at styre "+
+               "programmet når det ligger på din hjemmeside som Applet.\n\n" +"" +
+               "Ind til videre er det kun \"Vis\" der virker, men jeg skulle gerne ubygge"+
+               "så man kan teste parametre i programmet, mens det kører. Fx. skifte farve på"+
+               "på baggrunden eller låse BMI for børn.\n\n"+
+               "Når du skal angive en værdi på hjemmesiden, skal du skrive\n"+
+               " <param name=\"paramnavn\" value=\"tal/tekst\"> \n\n");
+      }
+   }  public void visParam(int index){
+      /* viser parametre i bmivindue */
+      /* Indtast i bmi textfeltet og få svar i tekstarea */
+      
+      String Parameter[][]=getParameterInfo();
+      int antal=Parameter.length;
+      jTextArea1.setText("");
+      if (index==-1){
+         for(int i=0 ; i<antal-1 ;i++){
+            jTextArea1.setText(jTextArea1.getText()+ Parameter[i][0] + ", ");
+         }
+         jTextArea1.setText(jTextArea1.getText()+ Parameter[antal-1][0]);
+      }
+      else{
+      jTextArea1.setText("Parameternavn:    " + Parameter[index][0] + "\n" +
+            "Variabeltype:     " + Parameter[index][1] + "\n" +
+            "Beskrivelse: " + Parameter[index][2] + "\n\n"
+            );
+      }
+      
+   }
+   public void setParam(String input){
+      /* instiller udvalgte parametre via bmivindue */
+   } 
+   public void reset(String input){
+      /* instiller udvalgte parametre via bmivindue */
+      jLabel2.setText("Beregn dit BMI index");
+      jLabel3.setText("Højde");
+      labelAlder.setText("Alder");
+      jLabel4.setText("Vægt");
+      comboBoxSex.setModel(new DefaultComboBoxModel(new String[] {"Pige", "Dreng", "Kvinde","Mand"}));
+      labelSex.setText("Køn");
+      jLabel5.setText("Dit BMI index er:");
+      jButton1.setText("Beregn BMI");
+      alderInit();
+      this.jTextArea1.setText(this.TxtvarIntro);
+      this.jTextArea1.replaceRange("", 0, 0);
+   }
+
+   public void jButton1_mouseClicked(MouseEvent e)
+   {
+      int vaegt;
+      int hoejde;
+      int fejl = 0;
+      String h = this.jTextField2.getText();/* højde */
+      String v = this.jTextField1.getText();/* Vægt er nu Mode: "service" parameter */
+      
+      if (h.compareTo("service")==0){
+         setServicemode();
+
+         if (v.compareTo("bmi")==0){
+            reset(""); /* nulstil */
+         }
+         if(v.compareTo("visparam")==0){
+            setServicemode();
+            visParam(0); /* vis den første */
+         }
+         if(v.compareTo("visall")==0){
+            setServicemode();
+            visParam(-1);
+         }
+         if(v.compareTo("setparam")==0){
+            setServicemode();
+            setParam(this.jTextField3.getText());
+         }
+         
+      }
+
+      else{
+         try
+         {
+            h = this.jTextField2.getText();/* højde */
+            this.jTextField3.setText("0");
+            this.jTextArea1.setText("");
+
+            hoejde = Integer.parseInt(h);
+         } catch (Exception ex) {
+            this.jTextArea1.setText(this.jTextArea1.getText() + "Højden skal være et helt, positivt tal.\n");
+
+            hoejde = 0;
+            fejl = 1;
+            ex.printStackTrace();
+            this.jTextField2.setText("");
+         }
+         if (hoejde < 0) {
+            this.jTextArea1.setText(this.jTextArea1.getText() + "Højen skal være et positivt tal.\n");
+
+            hoejde = 0;
+            fejl = 1;
+         }
+         if (hoejde > 210)
+            this.jTextArea1.setText(this.jTextArea1.getText() + "Det er en meget høj person.\n");
+
+         try
+         {
+            v = this.jTextField1.getText();
+            vaegt = Integer.parseInt(v);
+         } catch (Exception ex) {
+            this.jTextArea1.setText(this.jTextArea1.getText() + "Vægten skal være et helt, positivt tal.\n");
+
+            vaegt = 0;
+            fejl = 1;
+            ex.printStackTrace();
+            this.jTextField1.setText("");
+         }
+         if (vaegt < 0) {
+            this.jTextArea1.setText(this.jTextArea1.getText() + "Vægten skal være et positivt tal.\n");
+
+            vaegt = 0;
+            fejl = 1;
+         }
+
+         if (vaegt > 250) {
+            this.jTextArea1.setText(this.jTextArea1.getText() + "Det er en meget tung person.\n");
+
+            vaegt = 0;
+            fejl = 1;
+         }
+
+
+         /* Her regnes bmi værdien ud! */
+         if (fejl == 0) {
+            float bmital= beregnBmi(vaegt,hoejde);
+            int bmigruppe=1;
+            this.jTextField3.setText(String.valueOf(bmital));
+
+            /* Bmi gruppe for voksne findes med faste grænser*/
+            if (comboBoxSex.getSelectedIndex() > 1){
+               bmigruppe =findVoksenBmigruppe( bmital, comboBoxSex.getSelectedIndex()%2 );
+            }
+            else  {// Skal senere ændres til børneBmi !!!!!
+               this.jTextArea1.setText(this.jTextArea1.getText() + "BMI for børn er upræcise!\n\n");
+
+               bmigruppe =findBørneBmigruppe( bmital, comboBoxSex.getSelectedIndex()%2 );/* Bmigruppe for børn findes i tabel*/
+            }
+            this.jTextArea1.setText(this.jTextArea1.getText() + this.bmiGruppetxt[bmigruppe]);
+         }
+         else
+         {
+            this.jTextArea1.setText(this.jTextArea1.getText() + "\n\n Prøv igen.");
+
+            fejl = 0;
+         }
+         this.jTextArea1.setText(this.jTextArea1.getText() + "\nDet er en " +
+               staturtxt[0] +
+               comboBoxSex.getItemAt(comboBoxSex.getSelectedIndex())+ " på "+
+               comboBoxAlder.getItemAt(comboBoxAlder.getSelectedIndex()) + " år.");
+      }
+   }
+
+   public Bmi() {
+      super();
+   }
+   private class ComboBoxSexItemListener implements ItemListener {
+      public void itemStateChanged(ItemEvent e) {
+         comboBoxSex_itemStateChanged(e);
+      }
+   }
+   private class ComboBoxAlderItemListener implements ItemListener {
+      public void itemStateChanged(ItemEvent e) {
+         comboBoxAlder_itemStateChanged(e);
+      }
+   }
+   private class SmalRadioButtonActionListener implements ActionListener {
+      public void actionPerformed(ActionEvent e) {
+         smalRadioButton_actionPerformed(e);
+      }
+   }
+   private class AlmindeligRadioButtonActionListener implements ActionListener {
+      public void actionPerformed(ActionEvent e) {
+         almindeligRadioButton_actionPerformed(e);
+      }
+   }
+   private class BredRadioButtonActionListener implements ActionListener {
+      public void actionPerformed(ActionEvent e) {
+         bredRadioButton_actionPerformed(e);
+      }
+   }
+
+
+   protected void comboBoxSex_itemStateChanged(ItemEvent e) {
+
+      int sexIndex = comboBoxSex.getSelectedIndex();
+      int alderIndex = comboBoxAlder.getSelectedIndex();
+      
+         /* True= Vi er Ikke i service mode */
+      if( "service".compareTo(jTextField2.getText())!=0){
+
+         /*
+          * Tjek for om børneBMI er tilladt
+          * */
+         if(TxtBarnBmi =="Off"){
+            if(sexIndex < voksenIndex){
+               comboBoxSex.setSelectedIndex(voksenIndex);
+               this.jTextArea1.setText("Der er slukket for at beregne BMI for børn. \n\n" +
+               "Kontakt Webmaster for mere information.");
+               alderIndex = comboBoxAlder.getSelectedIndex();
+            }   
+         }      /*
+          * tjek for voksen og ret hvis alder er forkert
+          *
+          */
+
+         if(sexIndex < voksenIndex){
+            if(alderIndex>=voksenAlderIndex ){
+               comboBoxAlder.setSelectedIndex(voksenAlderIndex - 1);
+            }
+            else
+            {}
+         }
+         else{  /* sexIndex er en voksenværdi */
+            if(alderIndex < voksenAlderIndex){
+               comboBoxAlder.setSelectedIndex(voksenAlderIndex);
+            }
+         }
+      }
+   }
+   protected void comboBoxAlder_itemStateChanged(ItemEvent e) {
+
+      int sexIndex = comboBoxSex.getSelectedIndex();
+      int alderIndex = comboBoxAlder.getSelectedIndex();
+
+      if("service".compareTo(jTextField2.getText())==0){
+         /* Vi er i service mode */
+         if(sexIndex==0){ /* vis*/
+            visParam(alderIndex);
+         }
+         if(sexIndex==1){ /* Set */
+            /*Skal laves så man gemmer værdi i parameter
+             * hent værdi i bmi-resultatfeltet og findparameteren i pinfo[][]
+             * */
+         }
+      }
+      /*
+       * Tjek for om børneBMI er tilladt
+       * */
+      else{
+         if(TxtBarnBmi =="Off"){
+            if(alderIndex < voksenAlderIndex){
+               comboBoxAlder.setSelectedIndex(voksenAlderIndex);
+               this.jTextArea1.setText("Der er slukket for at beregne BMI for børn. \n\n" +
+               "Kontakt Webmaster for mere information.");
+               alderIndex = comboBoxAlder.getSelectedIndex();
+            }   
+         }
+         /*
+          * tjek for voksen og ret hvis alder er forkert
+          *
+          */
+         if(alderIndex < voksenAlderIndex){/* alder er et barn*/
+            if(sexIndex >= voksenIndex ){
+               comboBoxSex.setSelectedIndex(sexIndex - 2);
+            }
+            else
+            {}
+         }
+         else{  /* alderIndex er en voksenværdi */
+            if(sexIndex < voksenIndex){
+               comboBoxSex.setSelectedIndex(sexIndex + 2);
+            }
+         }
+      }      
+   }
+   protected void smalRadioButton_actionPerformed(ActionEvent e) {
+      staturPower[0]=staturPower[1];
+      staturtxt[0]=staturtxt[1];
+      staturFaktor[0] = staturFaktor[1];
+   }
+   protected void almindeligRadioButton_actionPerformed(ActionEvent e) {
+      staturPower[0]=staturPower[2];
+      staturtxt[0]=staturtxt[2];
+      staturFaktor[0] = staturFaktor[2];
+   }
+   protected void bredRadioButton_actionPerformed(ActionEvent e) {
+      staturPower[0]=staturPower[3];
+      staturtxt[0]=staturtxt[3];
+      staturFaktor[0] = staturFaktor[3];
+   }
+}
